@@ -1,7 +1,9 @@
+import unittest
+import logging
+
 from volumetric_imports import *
 from geometry import Geometry
 from sphere import Sphere
-import unittest
 
 
 class GeometryTest(unittest.TestCase):
