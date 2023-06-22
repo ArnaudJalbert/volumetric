@@ -42,7 +42,7 @@ class Camera:
         Finds the pizel size.
         Finds the top left corner of the image plane.
 
-        https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-generating-camera-rays/generating-camera-rays.html
+        Algorithm: https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-generating-camera-rays/generating-camera-rays.html
         """
         self.look_at.normalize()
         self.look_up.normalize()
