@@ -1,20 +1,19 @@
-from volumetric_imports import (
-    math,
-    Vector,
-    Point,
-    ZERO_POINT,
-    DEFAULT_LOOK_AT,
-    DEFAULT_LOOK_UP,
-    DEFAULT_FOV,
-    DEFAULT_WIDTH,
-    DEFAULT_HEIGHT,
-)
 from dataclasses import dataclass, field
+import math
+from point import Point
+from vector import Vector
+
+DEFAULT_CAMERA_POSITION = lambda: Vector([0, 0, 5])
+DEFAULT_LOOK_AT = lambda: Vector([0, 0, -1])
+DEFAULT_LOOK_UP = lambda: Vector([0, 1, 0])
+DEFAULT_FOV = 45
+DEFAULT_WIDTH = 250
+DEFAULT_HEIGHT = 250
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, slots=True)
 class Camera:
-    position: Point = field(default_factory=ZERO_POINT)
+    position: Point = field(default_factory=DEFAULT_CAMERA_POSITION)
     look_at: Vector = field(default_factory=DEFAULT_LOOK_AT)
     look_up: Vector = field(default_factory=DEFAULT_LOOK_UP)
     width: int = field(default=DEFAULT_WIDTH)

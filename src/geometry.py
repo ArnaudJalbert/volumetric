@@ -1,10 +1,15 @@
-from volumetric_imports import Point, ZERO_POINT
 from dataclasses import dataclass, field
+from point import Point
+
+DEFAULT_GEOMETRY_POSITION = lambda: Point([0, 0, 0])
+DEFAULT_GEOMETRY_COLOR = lambda: (255, 255, 255)
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, slots=True)
 class Geometry(object):
-    position: Point = field(default_factory=ZERO_POINT)
+    position: Point = field(default_factory=DEFAULT_GEOMETRY_POSITION)
+    color: tuple[int] = field(default_factory=DEFAULT_GEOMETRY_COLOR)
+    visible: bool = True
 
     def __eq__(self, __value: object) -> bool:
         """Equal if the positions are equal.

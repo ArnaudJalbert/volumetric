@@ -1,9 +1,12 @@
-from volumetric_imports import *
+from dataclasses import dataclass
 from geometry import Geometry
-from dataclasses import dataclass, field
+from point import Point
+from vector import Vector
+
+DEFAULT_RADIUS = 1
 
 
-@dataclass
+@dataclass(kw_only=True, slots=True)
 class Sphere(Geometry):
     radius: float = DEFAULT_RADIUS
 
@@ -16,7 +19,7 @@ class Sphere(Geometry):
         Returns:
             bool: If the base geometry are and the radiuses are equal.
         """
-        return super().__eq__(__value) and __value.radius == self.radius
+        return super(Sphere, self).__eq__(__value) and __value.radius == self.radius
 
     def map(self, point: Point):
         """Estimates the distance between the point and the geometry.
@@ -29,4 +32,4 @@ class Sphere(Geometry):
             float: The approximate distance between the point and the geometry.
                    The value is 0 if the point is inside the geometry.
         """
-        return distance if (distance := point.length - self.radius) >= 0 else 0
+        return (point - self.position).length - self.radius
