@@ -49,19 +49,21 @@ class volumetric:
             distance = geometry.map(point)
 
             if distance < self.epsilon:
-                return HitPoint(hit=True, point=point, distance=total_distance)
+                return HitPoint(
+                    hit=True, point=point, distance=total_distance, geometry=geometry
+                )
 
             total_distance += distance
 
         return HitPoint()
 
-    def _compute_shading(self, geometry: Geometry, hitpoint: HitPoint) -> tuple:
-        return geometry.color
+    def _compute_shading(self, hitpoint: HitPoint) -> tuple:
+        return hitpoint.geometry.color
 
-    def _compute_background_color(self):
-        return (0, 0, 0)
+    def _compute_background_color(self) -> tuple:
+        return 0, 0, 0
 
-    def _compute_pixel_color(self, position_y: int, position_x: int) -> Color:
+    def _compute_pixel_color(self, position_y: int, position_x: int) -> tuple:
         """Computes the pixel color at position [position_x, position_y] of the image
         plane of the current scene.
 
@@ -77,13 +79,15 @@ class volumetric:
         hitpoints = []
 
         for geometry in self.scene.geometries:
-            hitpoints.append(self._raymarch(geometry, camera_ray))
-
-        for hitpoint in hitpoints:
+            hitpoint = self._raymarch(geometry, camera_ray)
             if hitpoint.hit:
-                return self._compute_shading(geometry, hitpoint)
-            else:
-                return self._compute_background_color()
+                hitpoints.append(self._raymarch(geometry, camera_ray))
+
+        if hitpoints:
+            closest_hitpoint = min(hitpoints)
+            return self._compute_shading(closest_hitpoint)
+
+        return self._compute_background_color()
 
     def execute(self) -> list:
         """Iterates over each pixels.

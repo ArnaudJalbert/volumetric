@@ -1,5 +1,6 @@
 from PIL import Image
-from point import Point
+from vector import Vector
+
 from scene import Scene
 from sphere import Sphere
 from volumetric import volumetric
@@ -7,6 +8,7 @@ from volumetric import volumetric
 if __name__ == "__main__":
     # create the scene
     scene = Scene()
+    scene.geometries.append(Sphere(position=Vector([-1, -1, -1]), color=(52, 52, 52)))
     volume = volumetric(scene)
     buffer = volume.execute()
 
