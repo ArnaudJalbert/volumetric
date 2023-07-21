@@ -1,13 +1,21 @@
 from PIL import Image
-from point import Point
+
 from scene import Scene
+from camera import Camera
+from point_light import PointLight
 from sphere import Sphere
-from volumetric import volumetric
+from vector import Vector
+from volumetric import Volumetric
 
 if __name__ == "__main__":
     # create the scene
-    scene = Scene()
-    volume = volumetric(scene)
+    camera = Camera(width=500, height=500, fov=35)
+    geometries = [
+        Sphere(position=Vector([0, 0, -1]), radius=1.2),
+    ]
+    light = PointLight(position=Vector([1, 1, 1.5]))
+    scene = Scene(camera=camera, geometries=geometries, light=light)
+    volume = Volumetric(scene)
     buffer = volume.execute()
 
     # TODO: Make this class for renders

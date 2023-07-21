@@ -10,7 +10,4 @@ from sphere import Sphere
 class Scene:
     camera: Camera = field(default_factory=lambda: Camera())
     geometries: list[Geometry] = field(default_factory=lambda: [Sphere()])
-    lights: list[Light] = field(default_factory=lambda: [PointLight()])
-
-    def __post_init__(self):
-        self.camera.init_camera_geometry()
+    light: Light = field(default_factory=lambda: PointLight())

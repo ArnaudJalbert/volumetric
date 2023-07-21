@@ -1,7 +1,6 @@
 import unittest
 import logging
-
-from volumetric_imports import *
+from point import Point
 from geometry import Geometry
 from sphere import Sphere
 
@@ -40,7 +39,7 @@ class GeometryTest(unittest.TestCase):
 
     def test_sphere_map(self):
         self.logger.info("Sphere Equality Test")
-        self.assertEqual(self.test_sphere.map(Point([0, 0.5, 0])), 0)
+        self.assertEqual(self.test_sphere.map(Point([0, 0.5, 0])), -0.5)
         self.assertEqual(self.test_sphere.map(Point([0, 1, 0])), 0)
         self.assertEqual(self.test_sphere.map(Point([0, 2, 0])), 1)
         self.assertEqual(self.test_sphere.map(Point([2, 0, 0])), 1)

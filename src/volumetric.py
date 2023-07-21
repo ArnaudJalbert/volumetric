@@ -2,16 +2,15 @@ from colour import Color
 from geometry import Geometry
 from hitpoint import HitPoint
 from itertools import product as cartesian_product, repeat
-from pyrr import Vector3 as Point
-from pyrr import Vector3 as Vector
 from scene import Scene
+from vector import Vector
 
 DEFAULT_MAX_RAYMARCH_STEPS = 1000
 DEFAULT_MAX_DISTANCE = 100
 DEFAULT_EPSILON = 0.001
 
 
-class volumetric:
+class Volumetric:
     scene = None
     pixel_buffer = None
     max_raymarch_steps = DEFAULT_MAX_RAYMARCH_STEPS
@@ -27,6 +26,19 @@ class volumetric:
     @staticmethod
     def _pixel_buffer_factory(size):
         return [None] * size
+
+    def _find_closest_geometry(self, direction: Vector) -> HitPoint:
+        hitpoints = []
+
+        for geometry in self.scene.geometries:
+            hitpoint = self._raymarch(geometry, direction)
+            if hitpoint.hit:
+                hitpoints.append(self._raymarch(geometry, direction))
+
+        if hitpoints:
+            return min(hitpoints)
+
+        return HitPoint()
 
     def _raymarch(self, geometry: Geometry, ray: Vector) -> HitPoint:
         """_summary_
@@ -49,23 +61,31 @@ class volumetric:
             distance = geometry.map(point)
 
             if distance < self.epsilon:
-                return HitPoint(hit=True, point=point, distance=total_distance)
+                return HitPoint(
+                    hit=True, point=point, distance=total_distance, geometry=geometry
+                )
 
             total_distance += distance
 
         return HitPoint()
 
-    def _compute_shading(self, geometry: Geometry, hitpoint: HitPoint) -> tuple:
-        return geometry.color
+    def _compute_shading(self, hitpoint: HitPoint) -> tuple:
+        attenuation = float(
+            self.scene.light.light_direction(hitpoint.point).dot(hitpoint.normal)
+            * self.scene.light.intensity
+        )
+        return tuple(
+            int(color * attenuation * 255) for color in hitpoint.geometry.color
+        )
 
-    def _compute_background_color(self):
-        return (0, 0, 0)
+    @staticmethod
+    def _compute_background_color() -> tuple:
+        return 50, 50, 50
 
-    def _compute_pixel_color(self, position_y: int, position_x: int) -> Color:
+    def _compute_pixel_color(self, position_y: int, position_x: int) -> tuple:
         """Computes the pixel color at position [position_x, position_y] of the image
         plane of the current scene.
 
-        If there is an
         Args:
             position_x (int): Position x of the pixel
             position_y (int): Position y of the pixel
@@ -74,20 +94,17 @@ class volumetric:
             Color: The computed color of the pixel
         """
         camera_ray = self.scene.camera.generate_ray_direction(position_x, position_y)
-        hitpoints = []
 
-        for geometry in self.scene.geometries:
-            hitpoints.append(self._raymarch(geometry, camera_ray))
+        hitpoint = self._find_closest_geometry(camera_ray)
 
-        for hitpoint in hitpoints:
-            if hitpoint.hit:
-                return self._compute_shading(geometry, hitpoint)
-            else:
-                return self._compute_background_color()
+        if hitpoint.hit:
+            return self._compute_shading(hitpoint)
+
+        return self._compute_background_color()
 
     def execute(self) -> list:
-        """Iterates over each pixels.
-        Computes the color of each pixels.
+        """Iterates over each pixel.
+        Computes the color of each pixel.
         Stores the pixel color in the buffer
 
         Returns:
@@ -96,10 +113,11 @@ class volumetric:
         width = self.scene.camera.width
         height = self.scene.camera.height
         pixel_positions = cartesian_product(range(width), range(height))
+        self.scene.camera.init_camera_geometry()
 
         for position_y, position_x in pixel_positions:
             self.pixel_buffer[
                 position_x * width + position_y
-            ] = self._compute_pixel_color(position_y, position_x)
+                ] = self._compute_pixel_color(position_y, position_x)
 
         return self.pixel_buffer
