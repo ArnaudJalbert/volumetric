@@ -1,14 +1,13 @@
 from PIL import Image
-from vector import Vector
 
 from scene import Scene
-from sphere import Sphere
+from camera import Camera
 from volumetric import volumetric
 
 if __name__ == "__main__":
     # create the scene
-    scene = Scene()
-    scene.geometries.append(Sphere(position=Vector([-1, -1, -1]), color=(52, 52, 52)))
+    camera = Camera(width=1000, height=1000, fov=35)
+    scene = Scene(camera=camera)
     volume = volumetric(scene)
     buffer = volume.execute()
 

@@ -2,9 +2,8 @@ from colour import Color
 from geometry import Geometry
 from hitpoint import HitPoint
 from itertools import product as cartesian_product, repeat
-from pyrr import Vector3 as Point
-from pyrr import Vector3 as Vector
 from scene import Scene
+from vector import Vector
 
 DEFAULT_MAX_RAYMARCH_STEPS = 1000
 DEFAULT_MAX_DISTANCE = 100
@@ -58,10 +57,17 @@ class volumetric:
         return HitPoint()
 
     def _compute_shading(self, hitpoint: HitPoint) -> tuple:
-        return hitpoint.geometry.color
+        attenuation = float(
+            self.scene.light.light_direction(hitpoint.point).dot(hitpoint.normal)
+            * self.scene.light.intensity
+        )
+        return tuple(
+            int(color * attenuation * 255) for color in hitpoint.geometry.color
+        )
 
-    def _compute_background_color(self) -> tuple:
-        return 0, 0, 0
+    @staticmethod
+    def _compute_background_color() -> tuple:
+        return 50, 50, 50
 
     def _compute_pixel_color(self, position_y: int, position_x: int) -> tuple:
         """Computes the pixel color at position [position_x, position_y] of the image
@@ -90,8 +96,8 @@ class volumetric:
         return self._compute_background_color()
 
     def execute(self) -> list:
-        """Iterates over each pixels.
-        Computes the color of each pixels.
+        """Iterates over each pixel.
+        Computes the color of each pixel.
         Stores the pixel color in the buffer
 
         Returns:
@@ -100,6 +106,7 @@ class volumetric:
         width = self.scene.camera.width
         height = self.scene.camera.height
         pixel_positions = cartesian_product(range(width), range(height))
+        self.scene.camera.init_camera_geometry()
 
         for position_y, position_x in pixel_positions:
             self.pixel_buffer[
