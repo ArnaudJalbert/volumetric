@@ -19,6 +19,4 @@ class Light:
         Returns:
             Vector:
         """
-        direction = self.position - point
-        direction.normalize()
-        return direction
+        return (self.position - point).normalized

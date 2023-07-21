@@ -15,7 +15,7 @@ class HitPoint:
 
     @property
     def normal(self) -> Vector:
-        """ Computes the normal of the hitpoint using the geometry's function.
+        """Computes the normal of the hitpoint using the geometry's function.
 
         Returns:
             Vector: The normal of the geometry at the current point.
